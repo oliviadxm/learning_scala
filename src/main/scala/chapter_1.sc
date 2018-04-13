@@ -6,24 +6,26 @@
 // Although println() is a good way to print a string, can you find a way
 // to print a string without println? Also, what kinds of numbers, strings,
 // and other data does the REPL support?
+println("Hello World!")
 
+"Hello World!"
 
 // 1 - 2
 // In the Scala REPL, convert the temperature value of 22.5 Centigrade to
 // Fahrenheit. The conversion formula is cToF(x) = (x * 9/5) + 32
-
+val f = 22.5 * 9 / 5 + 32
 
 // 1 - 3
 // Take the result from exercise 2, halve it, and convert it back to Centigrade.
 // You can use the generated constant variable instead of copying and pasting
 // the value yourself.
-
+(f - 32) * 5 / 9
 
 // 1 - 4
 // The REPL can load the interpret Scala code from an external file with the
 // :load <file> command. Create a new file named Hello.scala and add a command
 // that will print a greeting, then execute it from the REPL.
-
+//:load hello.scala
 
 // 1 - 5
 // Another way to load external Scala code is to paste it into the REPL in
@@ -31,3 +33,4 @@
 // source file. To do this, type :paste -raw, hit Return, and then paste the
 // contents of your source file from exercise 4. After existing "paste" mode
 // you should see the greeting.
+//:paste
