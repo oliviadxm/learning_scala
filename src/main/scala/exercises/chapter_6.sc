@@ -108,7 +108,62 @@ splitList(palin)
 // the source to a collection of individual lines using the getLines.toList operation. Here
 // is an example of using io.Source to read content from a URL, separate it into lines, and
 // return the result as a list of strings:
-val url = "http://api.openweathermap.org/data/2.5/weather?q=London,uk&appid=5bd4361d87eb512184b455462ae82c9e"
-val l: List[String] = io.Source.fromURL(url).getLines.toList
-println(l(0))
-// TODO finish this when the api key becomes valid.
+val url = "http://samples.openweathermap.org/data/2.5/forecast?q=London,us&" +
+  "mode=xml&appid=b6907d289e10d714a6e88b30761fae22"
+val xmlList: List[String] = io.Source.fromURL(url).getLines.toList
+println(xmlList.head)
+
+// a. To make doubly sure we have the right content, print out the top 10 lines of the file.
+// This should be a one-liner.
+xmlList take 10
+
+// b. The forecast's city's name is there in the first 10 lines. Grab it from the correct
+// line and print out its XML element. Then extract the city name and country code from the
+// XML elements and print them out together. This is a good place to use regular expressions
+// to extract the text from XML tags.
+//
+// If you don't want to use regular expression capturing groups, you could instead use the
+// replaceAll() operation on strings to remove the text surrounding the city name and the
+// country name.
+val k = xmlList map (_.trim)
+def getValue(tag: String) = k filter (_ contains s"<$tag>") mkString "" replaceAll(".*>(\\w+)</.*","$1")
+val city = getValue("name")
+val country = getValue("country")
+
+// c. How many forecast segments are there? What is the shortest expression you can write
+// to count the segments?
+val numOfSegments = xmlList.count(_ contains "</time>")
+
+// d. The "symbol" XML element in each forecast segment includes a description of the weather
+// forecast. Extract this element in the same way you extracted the city name and country
+// code. Try iterating through the forecasts. printing out the description.
+//
+// Then create an informal weather report by printing out the weather descriptions over the
+// next 12 hours.
+def attributes(tag: String, attr: String) = {
+  k.filter(_ contains s"<$tag")
+    .filter(_ contains s"$attr=")
+    .map{ s => s.replaceAll(s""".*$attr="([^"]+)".*""", "$1") }
+}
+val namesD = attributes("symbol", "name")
+
+// e. Let's find out what description are used in this forecast. Print a sorted listing of
+// all of these descriptions in the forecast, with duplicate entries removed.
+val terms = attributes("symbol", "name").distinct.sorted
+
+// f. These descriptions may be useful later. Included in the "symbol" XML element is an
+// attribute containing the symbol number. Create a map from the symbol number to the
+// description. Verify this is accurate by manually accessing symbol values from the forecast
+// and checking that the description matches the XML document.
+val symbolsToDescriptions = attributes("symbol", "number") zip attributes("symbol", "name")
+val symMap = symbolsToDescriptions.distinct.map(t => t._1.toInt -> t._2).toMap
+println("Light rain? Yup, " + symMap(804))
+
+// g. What are the high and low temperatures over the next 24 hours?
+val maxC = attributes("temperature", "max").map(_.toDouble).max
+val minC = attributes("temperature", "min").map(_.toDouble).min
+
+// h. What is the average temperature in this weather forecast? You can use the "value" attribute
+// in the temperature element to calculate this value.
+val temps = attributes("temperature", "value").map(_.toDouble)
+val avgC = temps.sum / temps.size
